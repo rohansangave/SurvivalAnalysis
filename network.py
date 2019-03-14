@@ -33,7 +33,7 @@ class DeepSurv(nn.Module):
             if batch_norm:
                 self.layers.append(nn.BatchNorm1d(hidden_layers_sizes[i+1], eps=1e-05, momentum=momentum, affine=True, track_running_stats=True))
 
-            if not dropout is None:
+            if dropout:
                 self.layers.append(nn.Dropout(dropout, inplace=True))
 
         self.layers.append(nn.Linear(hidden_layers_sizes[-2], hidden_layers_sizes[-1]))
