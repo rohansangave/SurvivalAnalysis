@@ -63,22 +63,6 @@ def get_concordance_index(x, t, e, **kwargs):
     #     e)
     pass
 
-# @TODO: implement for varios instances of datasets
-def prepare_data(dataset, standardize=False, offset=None, scale=None):
-    if isinstance(dataset, dict):
-        x, e, t = dataset['x'], dataset['e'], dataset['t']
-
-    if standardize:
-        x = (x - offset) / scale
-
-    # Sort Training Data for Accurate Likelihood
-    sort_idx = numpy.argsort(t)[::-1]
-    x = x[sort_idx]
-    e = e[sort_idx]
-    t = t[sort_idx]
-
-    return (torch.from_numpy(x), torch.from_numpy(e), torch.from_numpy(t))
-
 def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloader= None, n_epochs = 500, standardize=True):
     """
     Trains a DeepSurv network on the provided training data and evalutes
@@ -132,16 +116,6 @@ def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloade
     improvement_threshold = 0.99999
     patience_increase = 2
     validation_frequency = 5
-
-    # Set Standardization layer offset and scale to training data mean and std
-    # if standardize:
-    #     offset = train_data['x'].mean(axis = 0)
-    #     scale = train_data['x'].std(axis = 0)
-
-    # x_train, e_train, t_train = prepare_data(train_data, standardize, offset, scale)
-
-    # if valid_data:
-    #     x_valid, e_valid, t_valid = prepare_data(valid_data, standardize, offset, scale)
 
     # Initialize Metrics
     best_validation_loss = numpy.inf
