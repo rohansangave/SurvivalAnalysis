@@ -5,7 +5,8 @@ class DeepSurv(nn.Module):
         dropout = None,
         batch_norm = False,
         standardize = False,
-        momentum = 0.1
+        momentum = 0.1,
+        cox=False
         ):
         
         super(DeepSurv, self).__init__()
@@ -25,16 +26,17 @@ class DeepSurv(nn.Module):
         else:
             raise IllegalArgumentException("Unknown activation function: %s" % activation)
 
-        # Construct Neural Network
-        for i in range(len(hidden_layers_sizes)-2):
-            self.layers.append(nn.Linear(hidden_layers_sizes[i],hidden_layers_sizes[i+1]))
-            self.layers.append(activation_fn)
+        if not cox:
+            # Construct Neural Network
+            for i in range(len(hidden_layers_sizes)-2):
+                self.layers.append(nn.Linear(hidden_layers_sizes[i],hidden_layers_sizes[i+1]))
+                self.layers.append(activation_fn)
 
-            if batch_norm:
-                self.layers.append(nn.BatchNorm1d(hidden_layers_sizes[i+1], eps=1e-05, momentum=momentum, affine=True, track_running_stats=True))
+                if batch_norm:
+                    self.layers.append(nn.BatchNorm1d(hidden_layers_sizes[i+1], eps=1e-05, momentum=momentum, affine=True, track_running_stats=True))
 
-            if dropout:
-                self.layers.append(nn.Dropout(dropout, inplace=True))
+                if dropout:
+                    self.layers.append(nn.Dropout(dropout, inplace=True))
 
         self.layers.append(nn.Linear(hidden_layers_sizes[-2], hidden_layers_sizes[-1]))
         self.network = nn.Sequential(*(self.layers))

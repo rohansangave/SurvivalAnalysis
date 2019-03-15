@@ -16,7 +16,8 @@ def negative_log_likelihood(risk, E):
     censored_likelihood = uncensored_likelihood * E
     num_observed_events = torch.sum(E)
     # print("observed_events: ", num_observed_events)
-    neg_likelihood = -torch.sum(censored_likelihood) # / num_observed_events
+    # print(censored_likelihood)
+    neg_likelihood = -torch.sum(censored_likelihood)# / num_observed_events
     print("neg_likelihood: ", neg_likelihood)
     return neg_likelihood
 
