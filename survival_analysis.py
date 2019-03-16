@@ -2,8 +2,11 @@ import numpy
 import time
 import torch
 
+from lifelines import CoxPHFitter
 from lifelines.utils import concordance_index
 from torch import nn 
+import pandas as pd
+import numpy as np
 
 
 
@@ -23,94 +26,40 @@ def negative_log_likelihood(risk, E):
 
 
 def get_concordance_index(x, t, e, **kwargs):
-    """
-    Taken from the lifelines.utils package. Docstring is provided below.
+    x = x.detach().cpu().numpy()
+    t = t.detach().cpu().numpy()
+    e = e.detach().cpu().numpy()
+    computed_hazard = np.exp(x)
 
-    Parameters:
-        x: (n, d) numpy array of observations.
-        t: (n) numpy array representing observed time events.
-        e: (n) numpy array representing time indicators.
+    return concordance_index(t,-1*computed_hazard,e)
 
-    Returns:
-        concordance_index: calcualted using lifelines.utils.concordance_index
+def valid_fn(model,valid_dataloader,device,optimizer):
+    model.eval()
+    i=0
 
-    lifelines.utils.concordance index docstring:
+    for batch_idx, (x, e, t) in enumerate(valid_dataloader):
 
-    Calculates the concordance index (C-index) between two series
-    of event times. The first is the real survival times from
-    the experimental data, and the other is the predicted survival
-    times from a model of some kind.
+        x = x.to(device)
+        e = e.float().to(device)
 
-    The concordance index is a value between 0 and 1 where,
-    0.5 is the expected result from random predictions,
-    1.0 is perfect concordance and,
-    0.0 is perfect anti-concordance (multiply predictions with -1 to get 1.0)
+        optimizer.zero_grad()
+        # print("x: ", x)
+        outputs = model(x)
 
-    Score is usually 0.6-0.7 for survival models.
+        loss = negative_log_likelihood(outputs, e)
 
-    See:
-    Harrell FE, Lee KL, Mark DB. Multivariable prognostic models: issues in
-    developing models, evaluating assumptions and adequacy, and measuring and
-    reducing errors. Statistics in Medicine 1996;15(4):361-87.
-    """
-    # compute_hazards = theano.function(
-    #     inputs = [self.X],
-    #     outputs = -self.partial_hazard
-    # )
-    # partial_hazards = compute_hazards(x)
+        i += 1
+        if i % 50 == 49:
+            print('Epoch: {}\tBatch: {}\tAvg-Loss: {:.4f}'.format(epoch+1, i+1, avg_loss/50))
+            avg_loss = 0.0    
 
-    # return concordance_index(t,
-    #     partial_hazards,
-    #     e)
-    pass
+        valid_ci = get_concordance_index(outputs,t,e)
+    model.train()
+    return valid_ci,loss
 
-def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloader= None, n_epochs = 500, standardize=True):
-    """
-    Trains a DeepSurv network on the provided training data and evalutes
-        it on the validation data.
 
-    Parameters:
-        train_data: dictionary with the following keys:
-            'x' : (n,d) array of observations (dtype = float32).
-            't' : (n) array of observed time events (dtype = float32).
-            'e' : (n) array of observed time indicators (dtype = int32).
-        valid_data: optional. A dictionary with the following keys:
-            'x' : (n,d) array of observations.
-            't' : (n) array of observed time events.
-            'e' : (n) array of observed time indicators.
-        standardize: True or False. Set the offset and scale of
-            standardization layey to the mean and standard deviation of the
-            training data.
-        n_epochs: integer for the maximum number of epochs the network will
-            train for.
-        validation_frequency: how often the network computes the validation
-            metrics. Decreasing validation_frequency increases training speed.
-        patience: minimum number of epochs to train for. Once patience is
-            reached, looks at validation improvement to increase patience or
-            early stop.
-        improvement_threshold: percentage of improvement needed to increase
-            patience.
-        patience_increase: multiplier to patience if threshold is reached.
-        logger: None or DeepSurvLogger.
-        update_fn: lasagne update function for training.
-            Default: lasagne.updates.nesterov_momentum
-        **kwargs: additional parameters to provide _get_train_valid_fn.
-            Parameters used to provide configurations to update_fn.
 
-    Returns:
-        metrics: a dictionary of training metrics that include:
-            'train': a list of loss values for each training epoch
-            'train_ci': a list of C-indices for each training epoch
-            'best_params': a list of numpy arrays containing the parameters
-                when the network had the best validation loss
-            'best_params_idx': the epoch at which best_params was found
-        If valid_data is provided, the metrics also contain:
-            'valid': a list of validation loss values for each validation frequency
-            'valid_ci': a list of validation C-indiices for each validation frequency
-            'best_validation_loss': the best validation loss found during training
-            'best_valid_ci': the max validation C-index found during training
-    """
-
+def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloader, n_epochs, standardize):
     offset = None
     scale = None
     patience = 2000
@@ -122,6 +71,8 @@ def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloade
     best_validation_loss = numpy.inf
     best_params = None
     best_params_idx = -1
+    c_index = []
+    valid_c_index = []
 
     start = time.time()
     for epoch in range(n_epochs):
@@ -142,29 +93,26 @@ def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloade
             
             avg_loss += loss.item()
 
+            print(avg_loss)
+
             i += 1
             if i % 50 == 49:
                 print('Epoch: {}\tBatch: {}\tAvg-Loss: {:.4f}'.format(epoch+1, i+1, avg_loss/50))
                 avg_loss = 0.0    
             
-            ci_train = get_concordance_index(x, t, e)
-
+            ci_train = get_concordance_index(outputs, t, e)
+            c_index.append(ci_train)
             torch.cuda.empty_cache()
             del x
             del e
             del loss
 
         # not completed yet
-        if valid_dataloader and (epoch % validation_frequency == 0):
-            validation_loss = valid_fn(x_valid, e_valid)
+        if valid_dataloader and ((epoch+1) % validation_frequency == 0):
+            ci_valid, validation_loss = valid_fn(model,valid_dataloader,device,optimizer)
             print('valid_loss: ',validation_loss)
 
-            ci_valid = get_concordance_index(
-                x_valid,
-                t_valid,
-                e_valid
-            )
-
+            valid_c_index.append(ci_valid)
             if validation_loss < best_validation_loss:
                 # improve patience if loss improves enough
                 if validation_loss < best_validation_loss * improvement_threshold:
@@ -183,7 +131,8 @@ def train(model, train_dataloader, device, optimizer, scheduler, valid_dataloade
     metrics = {}
     metrics['best_valid_loss'] = best_validation_loss
     metrics['best_params_idx'] = best_params_idx
-
+    metrics['c-index'] = c_index
+    #metrics['valid_c-index'] = valid_c_index
     return metrics
 
 
