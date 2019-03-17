@@ -10,7 +10,8 @@ import numpy as np
 
 
 
-def negative_log_likelihood(risk, E):
+def negative_log_likelihood(risk, E, risk_set):
+    print(risk_set)
     hazard_ratio = torch.exp(risk)
     # print("hazard_ratio: ", hazard_ratio)
     log_risk = torch.log(torch.cumsum(hazard_ratio.flatten(), dim=0))
@@ -47,13 +48,7 @@ def valid_fn(model,valid_dataloader,device,optimizer):
 
 
 
-def train(model, train_dataloader, device, optimizer, valid_dataloader, n_epochs, standardize):
-    offset = None
-    scale = None
-    patience = 2000
-    improvement_threshold = 0.99999
-    patience_increase = 2
-    validation_frequency = 5
+def train(model, x, e, t, CUDA, optimizer, n_epochs):
 
     # Initialize Metrics
     best_validation_loss = numpy.inf
@@ -62,6 +57,14 @@ def train(model, train_dataloader, device, optimizer, valid_dataloader, n_epochs
     c_index = []
     valid_c_index = []
 
+    risk_set = []
+    for i in range(len(t)):
+        temp = []
+        for j in range(len(t)):
+            if t[j] > t[i]:
+                temp.append(j)
+        risk_set.append(temp)
+    
     start = time.time()
     for epoch in range(n_epochs):
 
@@ -72,12 +75,12 @@ def train(model, train_dataloader, device, optimizer, valid_dataloader, n_epochs
         # print("x: ", x)
         outputs = model(x)
 
-        loss = negative_log_likelihood(outputs, e)
+        loss = negative_log_likelihood(outputs, e, risk_set)
         loss.backward()
         optimizer.step()
 
 
-        print loss.cpu().data.numpy()
+        print(loss.cpu().data.numpy())
         
         ci_train = get_concordance_index(outputs, t, e)
         c_index.append(ci_train)
