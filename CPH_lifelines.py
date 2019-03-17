@@ -13,7 +13,7 @@ from lifelines.datasets import load_rossi
 from lifelines.utils import concordance_index
 
 
-df = pd.read_csv('whas500.csv',sep=',')
+df = pd.read_csv('./datasets/whas1638.csv',sep=',')
 dt = df.values
 
 
@@ -22,7 +22,7 @@ rossi = load_rossi()
 
 
 cph = CoxPHFitter()
-cph.fit(df, duration_col="lenfol", event_col="fstat")
+cph.fit(df[['1', '2', '3', '4', '5', 'lenfol', 'fstat']], duration_col="lenfol", event_col="fstat")
 
 cph.print_summary()
 print(cph.score_)
