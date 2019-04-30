@@ -16,7 +16,7 @@ import torch.utils.data.dataloader as dataloader
 import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm_notebook as tqdm
-get_ipython().magic('matplotlib inline')
+#get_ipython().magic('matplotlib inline')
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils import resample
 import _pickle as pkl
