@@ -277,7 +277,6 @@ def train_model(gated_network, betas_network, risk_set, x_train, e_train, t_trai
 
 def run_experiment(params):
     linear_model, learning_rate, layers_size, seed,data_dict= params
-	print("in")
     layers_size = layers_size[:]
     layers_size += [linear_model]
     torch.manual_seed(seed)
