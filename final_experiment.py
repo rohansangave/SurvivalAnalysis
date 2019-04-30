@@ -293,7 +293,7 @@ def run_experiment(params):
 #     if CUDA:
 #         gated_network.cuda()
 #         betas_network.cuda()
-    n_epochs = 2
+    n_epochs = 2000
     metrics = train_model(gated_network, betas_network, 
                           data_dict["risk_set"], data_dict["x_train"], data_dict["e_train"], data_dict["t_train"],
                         data_dict["risk_set_valid"], data_dict["x_valid"], data_dict["e_valid"], data_dict["t_valid"], 
@@ -346,7 +346,7 @@ def final_experiments():
                for linear_model in linear_models for seed in range(3) for d in data]
         print("Hyperparams initialized")
 
-        p = Pool(32)
+        p = Pool(8)
         print("Pool created")
         output = p.map(run_experiment, hyperparams)
         p.close()
