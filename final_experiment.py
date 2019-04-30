@@ -24,31 +24,6 @@ import _pickle as pkl
 from torch.multiprocessing import Pool
 
 
-def f(x):
-    print(x)
-
-
-data_dict={"x_train":1,"e_train":2
-                  }
-n_in = 10
-linear_models=[2,5,10,12]
-learning_rates=[1e-4,1e-3]
-layer_sizes = [[n_in],[n_in,n_in],[n_in,n_in,n_in],[n_in,20,15]]
-data=[data_dict]
-hyperparams = [(linear_model, learning_rate, layer_size, seed, d) for layer_size in layer_sizes for learning_rate in learning_rates 
-       for linear_model in linear_models for seed in range(3) for d in data]
-print("Hyperparams initialized")
-
-p = Pool(2)
-print("Pool created")
-output = p.map(f, hyperparams)
-
-
-
-
-
-
-
 # In[2]:
 
 print("Dependencies loaded")
@@ -300,8 +275,9 @@ def train_model(gated_network, betas_network, risk_set, x_train, e_train, t_trai
 
 # In[9]:
 
-def run_experiment(linear_model, learning_rate, layers_size, seed,data_dict):
-    print("in")
+def run_experiment(params):
+    linear_model, learning_rate, layers_size, seed,data_dict= params
+	print("in")
     layers_size = layers_size[:]
     layers_size += [linear_model]
     torch.manual_seed(seed)
