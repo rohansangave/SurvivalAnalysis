@@ -1,9 +1,0 @@
-Dataset: WHAS500
-Lifelines CPH concordance index = 0.7662643548151007
-Our CPH concordance index = 0.7652929513366779
-Our DeepSurv concordance index = 0.7707487790922035
-
-Dataset: WHAS1638
-Lifelines CPH concordance index = 0.7487969506976266
-Our CPH concordance index = 0.7476611693950207
-Our DeepSurv concordance index = 0.7763382951652223
