@@ -14,7 +14,7 @@
   ```
  </p>
 
-<h5>Generated Results </h5>
+<h4>Generated Results </h4>
 
 ![ScreenShot](Images/Graphs.JPG)
 
@@ -27,10 +27,12 @@
 ![ScreenShot](Images/NonLinearGating.JPG)
 <p align='center'> Table 2:  Results of hard and soft non-linear gating networks and their comparison with relevantbaselines (95% bootstrap CI ). </p>
 
+<h4>Hyper Parameters for Hard and Soft Gating </h4>
+
 ![ScreenShot](Images/HP_HardGating.JPG)
-<p align='center'> Table 3: Hyperparameters for different datasets with hard-gating network</p>
+<p> Table 3: Hyperparameters for different datasets with hard-gating network</p>
 
 ![ScreenShot](Images/HP_Softgating.JPG)
-<p align='center'> Table 4: Hyperparameters for different datasets with soft-gating network</p>
+<p> Table 4: Hyperparameters for different datasets with soft-gating network</p>
 
 
