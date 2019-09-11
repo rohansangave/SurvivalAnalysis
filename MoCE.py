@@ -26,8 +26,9 @@ def get_dataset(DATASET_CHOICE):
         # WHAS
         ds = pd.read_csv('./datasets/whas1638.csv',sep=',')
         train = ds[:1310]
-        valid = train[-100:]
-        train = train[:-100]
+        valid_size = int(len(ds.index) * 0.1)
+        valid = train[-valid_size:]
+        train = train[:-valid_size]
         test = ds[1310:]
         x_train = train[['0','1', '2', '3', '4', '5']].as_matrix()
         x_valid = valid[['0','1', '2', '3', '4', '5']].as_matrix()
@@ -37,9 +38,15 @@ def get_dataset(DATASET_CHOICE):
         # GBSG
         ds = pd.read_csv('./datasets/gbsg2232.csv',sep=',')
         train = ds[:1546]
-        valid = train[-100:]
-        train = train[:-100]
+        valid_size = int(len(ds.index) * 0.1)
+        valid = train[-valid_size:]
+        train = train[:-valid_size]
         test = ds[1546:]
+        print("GBSG Dataset: ")
+        print("Total dataset size: ", len(ds.index))
+        print("Train data size: ", len(train.index))
+        print("Validation data size: ", len(valid.index))
+        print("Test data size: ", len(test.index))
         x_train = train[['0','1', '2', '3', '4', '5', '6']].as_matrix()
         x_valid = valid[['0','1', '2', '3', '4', '5', '6']].as_matrix()
         x_test = test[['0','1', '2', '3', '4', '5', '6']].as_matrix() 
@@ -48,9 +55,15 @@ def get_dataset(DATASET_CHOICE):
         # for METABRIC
         ds = pd.read_csv('./datasets/metabric1904.csv',sep=',')
         train = ds[:1523]
-        valid = train[-100:]
-        train = train[:-100]
+        valid_size = int(len(ds.index) * 0.1)
+        valid = train[-valid_size:]
+        train = train[:-valid_size]
         test = ds[1523:]
+        print("METABRIC Dataset: ")
+        print("Total dataset size: ", len(ds.index))
+        print("Train data size: ", len(train.index))
+        print("Validation data size: ", len(valid.index))
+        print("Test data size: ", len(test.index))
         x_train = train[['0','1', '2', '3', '4', '5', '6', '7', '8']].as_matrix()
         x_valid = valid[['0','1', '2', '3', '4', '5', '6', '7', '8']].as_matrix()
         x_test = test[['0','1', '2', '3', '4', '5', '6', '7', '8']].as_matrix() 
@@ -59,9 +72,15 @@ def get_dataset(DATASET_CHOICE):
         # for SUPPORT
         ds = pd.read_csv('./datasets/support8873.csv',sep=',')
         train = ds[:7098]
-        valid = train[-100:]
-        train = train[:-100]
+        valid_size = int(len(ds.index) * 0.1)
+        valid = train[-valid_size:]
+        train = train[:-valid_size]
         test = ds[7098:]
+        print("SUPPORT Dataset: ")
+        print("Total dataset size: ", len(ds.index))
+        print("Train data size: ", len(train.index))
+        print("Validation data size: ", len(valid.index))
+        print("Test data size: ", len(test.index))
         x_train = train[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', ]].as_matrix()
         x_valid = valid[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']].as_matrix()
         x_test = test[['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']].as_matrix()
